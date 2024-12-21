@@ -13,6 +13,11 @@ module Github
     def issues(open: true, all_pages: false)
       state = open ? 'open' : 'closed'
 
+      # In hindsight, I don't like making the initial request here and then passing the response
+      # into the Depaginator. There's too many objects being passed around, making the code harder
+      # to understand. If I were to refactor this, I believe my approach would be to create two
+      # clients, one "regular" client and one which depaginates. Their interface would be the same,
+      # they may even share code through mixins, but it would clean a lot of this mess up.
       first_page = @client.get("/issues?state=#{state}")
       issues = Depaginator.new(first_page, all_pages: all_pages, client: @client).parsed_response
 

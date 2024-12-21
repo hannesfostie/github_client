@@ -14,6 +14,8 @@ module Github
       if all_pages
         if page_count.to_i > 1
           other_pages = (2..page_count).to_a.map do |i|
+            # Building the path like this is kind of sloppy. Turns out that the url and path we start
+            # with is not actually the same as GH responds with in the "links" header.
             page_path = "/issues?" + uri_without_pagination.query + "&page=#{i}"
             page = client.get(page_path)
             JSON.parse(page.body)
@@ -28,6 +30,9 @@ module Github
 
     private
 
+    # The below methods are entirely untested for edge cases such as missing header,
+    # header lacking "last" link, non-200 responses... that kind of thing. There's also
+    # no unit tests yet, obviously. I'd consider this very WIP and exploratory.
     def uri_without_pagination
       url = links['last'].to_s.sub(/&page=\d+/, '')
       URI.parse(url)
